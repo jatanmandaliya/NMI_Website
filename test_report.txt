@@ -1,0 +1,69 @@
+EMG THREE-SENSOR TESTING RESULTS
+===============================
+
+Click Detection
+Movement Type: click
+Windows Analyzed: 39
+Correct Predictions: 39
+Accuracy: 100.00%
+Average Confidence: 0.9479
+Prediction Distribution:
+  no_click: 0 (0.00%)
+
+No Click
+Movement Type: no_click
+Windows Analyzed: 48
+Correct Predictions: 48
+Accuracy: 100.00%
+Average Confidence: 0.9477
+Prediction Distribution:
+  no_click: 48 (100.00%)
+
+Up Movement
+Movement Type: up
+Windows Analyzed: 49
+Correct Predictions: 41
+Accuracy: 83.67%
+Average Confidence: 0.8510
+Prediction Distribution:
+  up: 41 (83.67%)
+  down: 8 (16.33%)
+
+Down Movement
+Movement Type: down
+Windows Analyzed: 49
+Correct Predictions: 30
+Accuracy: 61.22%
+Average Confidence: 0.7949
+Prediction Distribution:
+  down: 30 (61.22%)
+  up: 19 (38.78%)
+
+Vertical Mode
+Movement Type: vertical
+Windows Analyzed: 49
+Correct Predictions: 49
+Accuracy: 100.00%
+Average Confidence: 0.8292
+Prediction Distribution:
+  vertical: 49 (100.00%)
+
+Horizontal Mode
+Movement Type: horizontal
+Windows Analyzed: 49
+Correct Predictions: 46
+Accuracy: 93.88%
+Average Confidence: 0.8501
+Prediction Distribution:
+  vertical: 3 (6.12%)
+  horizontal: 46 (93.88%)
+
+
+		Overall System Performance
+		Average Accuracy: 90.81%
+		Click Detection Accuracy (EMG1): 100.00%
+		Movement Control Accuracy (EMG2): 72.45%
+		Mode Toggle Accuracy (EMG3): 96.94%
+
+
+
