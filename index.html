@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMG Neural Machine Interface - Three Sensor Control System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --section-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #eee;
+            --shadow: rgba(0,0,0,0.1);
+            --shadow-hover: rgba(0,0,0,0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --section-bg: #2d2d2d;
+            --card-bg: #3a3a3a;
+            --border-color: #555;
+            --shadow: rgba(0,0,0,0.3);
+            --shadow-hover: rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section - Fixed */
+        .hero {
+            height: 100vh;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-content {
+            z-index: 2;
+            max-width: 800px;
+            padding: 0 2rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-button:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Floating animation for background elements */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        /* Sections - Updated with 1200px max-width */
+        section {
+            padding: 100px 0;
+        }
+
+        /* Container for all sections except hero */
+        section:not(.hero) .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--text-color);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* About Section */
+        .about {
+            background: var(--section-bg);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .about-image {
+            text-align: center;
+        }
+
+        .sensor-diagram {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .sensor-item {
+            margin: 10px 0;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 4px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .feature-card:nth-child(1) { border-top-color: #ff6b6b; }
+        .feature-card:nth-child(2) { border-top-color: #4ecdc4; }
+        .feature-card:nth-child(3) { border-top-color: #45b7d1; }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px var(--shadow-hover);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .feature-card p {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        /* Results Section */
+        .results {
+            background: var(--section-bg);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .result-item {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: scale(1.02);
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .result-content {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .placeholder-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+        }
+
+        /* Video Section */
+        .videos {
+            text-align: center;
+        }
+
+        .video-grid {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .video-item {
+            background: var(--card-bg);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px var(--shadow-hover);
+            padding: 20px;
+            /* Phone-like dimensions for portrait videos */
+            width: 280px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-placeholder {
+            width: 240px; /* Phone screen width */
+            height: 426px; /* Phone screen height (16:9 portrait ratio) */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            border-radius: 20px;
+            border: 8px solid #333;
+            position: relative;
+            margin: 0 auto;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Phone-like frame styling */
+        .video-placeholder::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+        }
+
+
+        /* Phone video container - portrait only */
+        .phone-video {
+            width: 240px;
+            height: 426px;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 8px solid #333;
+            margin: 0 auto;
+            display: block;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* For actual video elements when you add them */
+        .video-item video {
+            width: 240px;
+            height: 426px;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 8px solid #333;
+            margin: 0 auto;
+            display: block;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .video-item h3 {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-color);
+        }
+
+        .video-item p {
+            text-align: center;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive adjustments for phone videos */
+        @media (max-width: 768px) {
+            .video-item {
+                width: 250px;
+                min-height: 550px;
+            }
+            
+            .video-placeholder,
+            .phone-video,
+            .video-item video {
+                width: 200px;
+                height: 356px;
+            }
+            
+            .video-grid {
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-item {
+                width: 220px;
+                min-height: 500px;
+            }
+            
+            .video-placeholder,
+            .phone-video,
+            .video-item video {
+                width: 180px;
+                height: 320px;
+            }
+        }
+
+        /* Reports Section */
+        .reports {
+            background: var(--section-bg);
+        }
+
+        .reports-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px var(--shadow);
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .reports-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .report-button {
+            display: inline-block;
+            padding: 20px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .report-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .report-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Add icons to buttons */
+        .report-button.test-report::before {
+            content: '📊';
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .report-button.project-report::before {
+            content: '📋';
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .reports-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .report-button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Team Section */
+        .team {
+            background: var(--bg-color);
+        }
+
+        .team-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .university-info {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .university-info h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .course-info {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .professor {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .team-member {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 4px solid transparent;
+        }
+
+        .team-member:nth-child(1) { border-top-color: #ff6b6b; }
+        .team-member:nth-child(2) { border-top-color: #4ecdc4; }
+        .team-member:nth-child(3) { border-top-color: #45b7d1; }
+
+        .team-member:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px var(--shadow-hover);
+        }
+
+        .member-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .team-member h4 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .team-member p {
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced Footer */
+        footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .footer-main h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #3498db;
+        }
+
+        .footer-main p {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .footer-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .footer-section h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #3498db;
+        }
+
+        .footer-section p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .footer-team {
+            text-align: right;
+        }
+
+        .footer-team h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #3498db;
+        }
+
+        .footer-team p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .footer-bottom {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive footer */
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .footer-details {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .footer-team {
+                text-align: center;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .results-grid,
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section:not(.hero) .section-container {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Mobile responsiveness for 1200px constraint */
+        @media (max-width: 1240px) {
+            section:not(.hero) .section-container {
+                padding: 0 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">EMG Neural Interface</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#videos">Videos</a></li>
+                <li><a href="#reports">Reports</a></li>
+                <li><a href="#team">Team</a></li>
+                <li><button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero"> 
+        <div class="hero-content">
+            <h1>EMG Neural Machine Interface</h1>
+            <p>Three-Sensor Control System for Computer Interaction</p>
+            <a href="#about" class="cta-button">Explore Project</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about fade-in">
+        <div class="section-container">
+            <h2 class="section-title">About the Project</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>This project implements a sophisticated three-sensor EMG (Electromyography) control system that enables hands-free computer interaction through muscle signal detection and machine learning classification.</p>
+                    
+                    <p>The system uses advanced signal processing techniques and Random Forest machine learning algorithms to interpret muscle contractions from three different sensors, providing intuitive control over cursor movement and clicking actions.</p>
+                    
+                    <p><strong>Key Capabilities:</strong></p>
+                    <ul style="margin-top: 1rem; margin-left: 2rem;">
+                        <li>Real-time muscle signal processing</li>
+                        <li>Intelligent feature extraction</li>
+                        <li>Adaptive movement control</li>
+                        <li>Mode switching between vertical and horizontal movement</li>
+                        <li>High-accuracy click detection</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <div class="sensor-diagram">
+                        <h3 style="margin-bottom: 2rem;">Three-Sensor Architecture</h3>
+                        <div class="sensor-item">Sensor 1 (EMG1): Click Detection</div>
+                        <div class="sensor-item">Sensor 2 (EMG2): Movement Control</div>
+                        <div class="sensor-item">Sensor 3 (EMG3): Mode Toggle</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="fade-in">
+        <div class="section-container">
+            <h2 class="section-title">System Features</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Machine Learning</h3>
+                    <p>Advanced Random Forest algorithms for high-accuracy pattern recognition and real-time classification of muscle signals.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Signal Processing</h3>
+                    <p>Sophisticated filtering, feature extraction (RMS, MAV, Zero Crossings), and noise reduction for reliable EMG signal interpretation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Adaptive Control</h3>
+                    <p>Confidence-based movement scaling, buffer-based stability, and dynamic mode switching for intuitive user experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results" class="results fade-in">
+        <div class="section-container">
+            <h2 class="section-title">Results & Analysis</h2>
+            <div class="results-grid">
+                <div class="result-item">
+                    <div class="result-header">
+                        <h3>Confusion Matrix - Click Detection</h3>
+                    </div>
+                    <div class="result-content">
+                        <div class="placeholder-image">
+                            Click Confusion Matrix
+                            <br><small>Upload: click_confusion_matrix.png</small>
+                        </div>
+                        <p>Accuracy analysis for click vs no-click classification using EMG1 sensor data.</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-header">
+                        <h3>Confusion Matrix - Movement</h3>
+                    </div>
+                    <div class="result-content">
+                        <div class="placeholder-image">
+                            Movement Confusion Matrix
+                            <br><small>Upload: movement_confusion_matrix.png</small>
+                        </div>
+                        <p>Performance metrics for up/down movement classification using EMG2 sensor.</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-header">
+                        <h3>Feature Importance Analysis</h3>
+                    </div>
+                    <div class="result-content">
+                        <div class="placeholder-image">
+                            Feature Importance Chart
+                            <br><small>Upload: feature_importance.png</small>
+                        </div>
+                        <p>Analysis of which EMG features contribute most to classification accuracy.</p>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-header">
+                        <h3>Test Results Summary</h3>
+                    </div>
+                    <div class="result-content">
+                        <div class="placeholder-image">
+                            Test Results Chart
+                            <br><small>Upload: test_results_chart.png</small>
+                        </div>
+                        <p>Comprehensive testing results showing system performance across all movement types.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Videos Section -->
+    <section id="videos" class="videos fade-in">
+        <div class="section-container">
+            <h2 class="section-title">Video Demonstrations</h2>
+            <div class="video-grid">
+                <div class="video-item">
+                    <div class="video-placeholder">
+                        <video class="phone-video" controls>
+                            <source src="Click.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <h3>Manual Testing - Click Detection</h3>
+                        <p>Demonstration of click detection functionality with EMG1 sensor during manual testing phase.</p>
+                    </div>
+                </div>
+                
+                <div class="video-item">
+                    <div class="video-placeholder">
+                        <video class="phone-video" controls>
+                            <source src="UD.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <h3>Testing of UP/DOWN movement</h3>
+                        <p>Real-time cursor movement control using EMG2 sensor for up/down navigation.</p>
+                    </div>
+                </div>
+                
+                <div class="video-item">
+                    <div class="video-placeholder">
+                        <video class="phone-video" controls>
+                            <source src="LR.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <h3>Testing of RIGHT/LEFT movement</h3>
+                        <p>Real-time cursor movement control using EMG2 sensor for Left/Right navigation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reports Section -->
+    <section id="reports" class="reports fade-in">
+        <div class="section-container">
+            <h2 class="section-title">Project Reports</h2>
+            <div class="reports-container">
+                <p style="font-size: 1.1rem; color: #666; margin-bottom: 1rem;">
+                    Access detailed technical documentation and test results for the EMG Neural Machine Interface project.
+                </p>
+                <div class="reports-buttons">
+                    <a href="test_report.pdf" class="report-button test-report" target="_blank">
+                        Test Report
+                    </a>
+                    <a href="project_report.pdf" class="report-button project-report" target="_blank">
+                        Project Report
+                    </a>
+                </div>
+                <p style="font-size: 0.9rem; color: #999; margin-top: 2rem;">
+                    
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="team fade-in">
+        <div class="section-container">
+            <h2 class="section-title">Our Team</h2>
+            <div class="team-container">
+                <div class="university-info">
+                    <h3>San Francisco State University</h3>
+                    <p class="course-info">Course: Neural Machine Interface</p>
+                    <p class="professor">Professor: Dr. Xiaorong Zhang</p>
+                </div>
+                
+                <div class="team-members">
+                    <div class="team-member">
+                        <div class="member-avatar">JM</div>
+                        <h4>Jatan Mandaliya</h4>
+                        <p>Team Member</p>
+                    </div>
+                    
+                    <div class="team-member">
+                        <div class="member-avatar">ND</div>
+                        <h4>Neha Desai</h4>
+                        <p>Team Member</p>
+                    </div>
+                    
+                    <div class="team-member">
+                        <div class="member-avatar">SS</div>
+                        <h4>Soundary Srinivas</h4>
+                        <p>Team Member</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-main">
+                <h3>EMG Neural Machine Interface Project</h3>
+                <p>Advanced three-sensor control system for hands-free computer interaction</p>
+            </div>
+            <div class="footer-details">
+                <div class="footer-section">
+                    <h4>Institution</h4>
+                    <p>San Francisco State University</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Course</h4>
+                    <p>Neural Machine Interface</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Instructor</h4>
+                    <p>Dr. Xiaorong Zhang</p>
+                </div>
+            </div>
+            <div class="footer-team">
+                <h4>Development Team</h4>
+                <p>Jatan Mandaliya • Neha Desai • Soundary Srinivas</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 All rights reserved | Developed with advanced signal processing and machine learning techniques</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Progress bar
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = scrollPercent + '%';
+        });
+
+        // Fade in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Header background change on scroll
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(102, 126, 234, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                header.style.backdropFilter = 'none';
+            }
+        });
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        // Feature cards hover effect enhancement
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const themeButton = document.querySelector('.theme-toggle');
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            if (newTheme === 'dark') {
+                themeButton.innerHTML = '☀️ Light';
+            } else {
+                themeButton.innerHTML = '🌙 Dark';
+            }
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const themeButton = document.querySelector('.theme-toggle');
+            
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            if (savedTheme === 'dark') {
+                themeButton.innerHTML = '☀️ Light';
+            } else {
+                themeButton.innerHTML = '🌙 Dark';
+            }
+        });
+    </script>
+</body>
+</html>
